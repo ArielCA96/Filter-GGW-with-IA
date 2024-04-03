@@ -1,4 +1,6 @@
 % GGW 
+clc
+clear
 
 min_frec = 5.0;
 max_frec = 20.0;
@@ -21,9 +23,31 @@ z3 = d + h + p;
 w_div = 8; % divisiones del ancho  8, 16
 l_div = 24; % divisiones del largo  24, 48
 
-% 
+% Matriz 8 X 24 con el parámetro Z de los pines internos
+% Simétrico respecto al ancho por lo que se define solamente 4 X 24
+PeriodicParameters = 8; % 2, 4, 6, 8
+PariodicPin = 2;
 
+PinFilter = PariodicPin * l_div/PeriodicParameters;  % Max w_div/2*l_div (96)
 
+MaxHeight = d; % Altura máxima de los pines del filtro
+
+RandomPin = rand(PariodicPin) * MaxHeight;
+
+if PeriodicParameters ~= 1
+    MatrixPeriodic = zeros(w_div/2, PeriodicParameters);
+    %value = randi([1, w_div/2*PeriodicParameters], 1, PariodicPin);
+    value = randperm(w_div/2*PeriodicParameters, PariodicPin);
+    for i=1:PariodicPin
+        MatrixPeriodic(value(i)) = RandomPin(i);
+    end
+
+    MatrixFilter = cat(2, MatrixPeriodic, MatrixPeriodic);
+    for i=3:l_div/PeriodicParameters
+        MatrixFilter = cat(2, MatrixFilter, MatrixPeriodic);
+    end
+    MatrixFilter = cat(1, MatrixFilter, MatrixFilter(end:-1:1, :));
+end
 
 %------------------
 cst = actxserver('CSTStudio.application');
@@ -149,7 +173,7 @@ Zrange = [z1 z2];
 XrangeAdd = [0 0];
 YrangeAdd = [0 0];
 ZrangeAdd = [0 0];
-CstWaveguidePort(mws,PortNumber, Xrange, Yrange, Zrange, XrangeAdd, YrangeAdd, ZrangeAdd, 'Free', 'positive', 'Y')
+CstWaveguidePort2(mws,PortNumber, Xrange, Yrange, Zrange, XrangeAdd, YrangeAdd, ZrangeAdd, 'Free', 'positive', 'Y')
 
 PortNumber = 2;
 Xrange = [3*p+a 3*p+a+w];
@@ -158,19 +182,39 @@ Zrange = [z1 z2];
 XrangeAdd = [0 0];
 YrangeAdd = [0 0];
 ZrangeAdd = [0 0];
-CstWaveguidePort(mws,PortNumber, Xrange, Yrange, Zrange, XrangeAdd, YrangeAdd, ZrangeAdd, 'Free', 'xmax', 'Y')
+CstWaveguidePort2(mws,PortNumber, Xrange, Yrange, Zrange, XrangeAdd, YrangeAdd, ZrangeAdd, 'Free', 'xmax', 'Y')
 
 % Filtro -----------------
+NameFilter = 'pin_f';
+for i=1:w_div
+    for j=1:l_div
+        if MatrixFilter(i,j) == 0
+            continue
+        end
+        stepX = w/w_div;
+        stepY = l/l_div;
+        Name = strcat(NameFilter, num2str(i), num2str(j));
+        component = 'component1';
+        material = 'PEC';
+        Xrange = [3*p+a + (i-1)*stepX, 3*p+a + i*stepX];
+        Yrange = [(j-1)*stepY, j*stepY];
+        Zrange = [z1 MatrixFilter(i,j)];
+        Cstbrick(mws, Name, component, material, Xrange, Yrange, Zrange)
 
+        component2 = strcat('component1:', Name); 
+        component1 = 'component1:base';
+        CstAdd(mws,component1,component2)
+    end
+end
 % Solucionador ---------------
 
 %Saves the project
 CstSaveProject(mws)
 
-CstDefineTimedomainSolver(mws,-40)
-
-exportpath = 'C:\Users\Ariel\OneDrive\Documents\cst\Data\a2.txt';
-CstExportSparametersTXT(mws, exportpath)
+% CstDefineTimedomainSolver(mws,-40)
+% 
+% exportpath = 'C:\Users\Ariel\OneDrive\Documents\cst\Data\a2.txt';
+% CstExportSparametersTXT(mws, exportpath)
 
 
 
