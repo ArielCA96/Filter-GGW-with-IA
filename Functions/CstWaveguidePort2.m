@@ -16,12 +16,12 @@ invoke(Port,'Orientation',Orientation);
 invoke(Port,'Normal',Normal);
 invoke(Port,'PortOnBound','False');
 invoke(Port,'ClipPickedPortToBound','False');  
-invoke(Port,'Xrange',int2str(Xrange(1)),int2str(Xrange(2)));
-invoke(Port,'Yrange',int2str(Yrange(1)),int2str(Yrange(2)));
-invoke(Port,'Zrange',int2str(Zrange(1)),int2str(Zrange(2)));
-invoke(Port,'XrangeAdd',int2str(XrangeAdd(1)),int2str(XrangeAdd(2)));
-invoke(Port,'YrangeAdd',int2str(YrangeAdd(1)),int2str(YrangeAdd(2)));
-invoke(Port,'ZrangeAdd',int2str(ZrangeAdd(1)),int2str(ZrangeAdd(2)));
+invoke(Port,'Xrange',sprintf('%.2f', Xrange(1)),sprintf('%.2f', Xrange(2)));
+invoke(Port,'Yrange',sprintf('%.2f', Yrange(1)),sprintf('%.2f', Yrange(2)));
+invoke(Port,'Zrange',sprintf('%.2f', Zrange(1)),sprintf('%.2f', Zrange(2)));
+invoke(Port,'XrangeAdd',sprintf('%.2f', XrangeAdd(1)),sprintf('%.2f', XrangeAdd(2)));
+invoke(Port,'YrangeAdd',sprintf('%.2f', YrangeAdd(1)),sprintf('%.2f', YrangeAdd(2)));
+invoke(Port,'ZrangeAdd',sprintf('%.2f', ZrangeAdd(1)),sprintf('%.2f', ZrangeAdd(2)));
 invoke(Port,'SingleEnded','False');
 invoke(Port,'Create');
 end 
